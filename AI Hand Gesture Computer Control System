@@ -1,0 +1,448 @@
+AI Hand Gesture Computer Control System
+
+Here is a complete project matter you can use for your assignment, GitHub repository, documentation, PPT, and demo.
+
+1. Project Title
+
+AI Hand Gesture Computer Control System
+
+Tagline
+
+Control Your Computer with Hand Gestures
+
+2. Introduction
+
+The AI Hand Gesture Computer Control System is a computer-vision-based application that allows users to control basic computer functions using hand gestures.
+
+The system uses a webcam to capture the user's hand movements. Computer vision and hand-landmark detection are used to identify different gestures. Each recognized gesture is mapped to a specific computer action such as moving the mouse, clicking, scrolling, or controlling volume.
+
+This system provides a touch-free and interactive method of controlling a computer.
+
+3. Objectives
+To develop a webcam-based hand gesture recognition system.
+To detect hand movements using computer vision.
+To recognize predefined hand gestures.
+To convert gestures into computer-control actions.
+To control the mouse cursor without using a physical mouse.
+To implement actions such as clicking, scrolling, and volume control.
+To provide a simple and user-friendly interface.
+4. Technologies Used
+Technology	Purpose
+Python	Main programming language
+OpenCV	Webcam and image processing
+MediaPipe	Hand detection and landmark tracking
+PyAutoGUI	Mouse and keyboard control
+NumPy	Numerical calculations
+Webcam	Real-time video input
+5. System Requirements
+Hardware
+Laptop/Desktop
+Working webcam
+Minimum 4 GB RAM
+Keyboard and mouse for normal computer operation
+Software
+Python 3.x
+VS Code / PyCharm / IDLE
+Required Python libraries
+6. How the System Works
+
+The system follows these steps:
+
+Webcam → Video Capture → Hand Detection → Landmark Detection → Gesture Recognition → Action Mapping → Computer Control
+
+Step 1: Capture
+
+The webcam continuously captures frames of the user's hand.
+
+Step 2: Hand Detection
+
+MediaPipe detects the hand present in the video frame.
+
+Step 3: Landmark Detection
+
+The system identifies 21 hand landmarks, including fingertips and joints.
+
+Step 4: Gesture Recognition
+
+The positions of the landmarks are analyzed to identify the user's gesture.
+
+Step 5: Action Mapping
+
+Each gesture is assigned to a computer action.
+
+Step 6: Computer Control
+
+PyAutoGUI performs the corresponding action on the computer.
+
+7. Gesture-to-Action Mapping
+Hand Gesture	Computer Action
+☝️ Index Finger	Move Mouse Cursor
+👌 Index + Thumb	Left Click
+✌️ Victory / Two Fingers	Scroll Up
+✊ Fist	Scroll Down
+👍 Thumbs Up	Increase Volume
+👎 Thumbs Down	Decrease Volume
+🖐️ Open Hand	Pause/Stop Control
+
+You can use fewer gestures if you want to keep the project simple.
+
+8. AI / Computer Vision Approach
+
+The project uses MediaPipe Hands, a computer-vision framework that detects a hand and provides landmark coordinates for the hand.
+
+The system does not need to train a separate deep-learning model from scratch. Instead, it uses a pre-trained hand landmark model.
+
+The detected landmarks are used to calculate relationships between fingers and determine the current gesture.
+
+For example:
+
+If the index finger is extended, the system interprets it as cursor movement.
+If the thumb and index finger come close together, it can be interpreted as a click.
+If two fingers are raised, the system can perform scrolling.
+If the thumb is raised, the system can control volume.
+9. Main Features
+🖱️ Mouse Movement
+
+The user moves their index finger in front of the webcam.
+
+The system converts the finger's position into screen coordinates and moves the mouse cursor accordingly.
+
+👆 Click
+
+The user brings the thumb and index finger together.
+
+The system detects the distance between the two landmarks and performs a mouse click.
+
+✌️ Scroll
+
+The user raises two fingers.
+
+The system interprets the gesture as a scrolling command.
+
+👍 Volume Control
+
+A thumbs-up gesture can increase the system volume.
+
+A thumbs-down gesture can decrease the volume.
+
+✊ Stop/Control
+
+A closed fist can be used for another computer action, such as scrolling down or temporarily stopping control.
+
+10. Project Architecture
+             WEBCAM
+                ↓
+        VIDEO FRAME CAPTURE
+                ↓
+          OPENCV PROCESSING
+                ↓
+       MEDIAPIPE HAND DETECTION
+                ↓
+       21 HAND LANDMARK POINTS
+                ↓
+        GESTURE CLASSIFICATION
+                ↓
+        GESTURE-ACTION MAPPING
+                ↓
+             PYAUTOGUI
+                ↓
+       COMPUTER CONTROL ACTION
+11. Project Folder Structure
+AI-Hand-Gesture-Computer-Control/
+│
+├── main.py
+├── requirements.txt
+├── README.md
+├── gesture_mapping.md
+│
+├── screenshots/
+│   ├── hand_detection.png
+│   ├── mouse_control.png
+│   ├── click_gesture.png
+│   └── scroll_gesture.png
+│
+└── demo/
+    └── demo_video.mp4
+12. Installation
+
+Install Python 3.x.
+
+Open the terminal in your project folder and run:
+
+pip install opencv-python mediapipe pyautogui numpy
+
+For volume control on Windows, you can additionally use:
+
+pip install pycaw comtypes
+13. Basic Working Code
+
+Create a file named:
+
+main.py
+
+Use:
+
+import cv2
+import mediapipe as mp
+import pyautogui
+import math
+
+screen_width, screen_height = pyautogui.size()
+
+mp_hands = mp.solutions.hands
+mp_draw = mp.solutions.drawing_utils
+
+hands = mp_hands.Hands(
+    max_num_hands=1,
+    min_detection_confidence=0.7,
+    min_tracking_confidence=0.7
+)
+
+cap = cv2.VideoCapture(0)
+
+click_ready = True
+
+while True:
+    success, frame = cap.read()
+
+    if not success:
+        break
+
+    frame = cv2.flip(frame, 1)
+
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    result = hands.process(rgb)
+
+    if result.multi_hand_landmarks:
+
+        hand = result.multi_hand_landmarks[0]
+        landmarks = hand.landmark
+
+        index_x = int(landmarks[8].x * frame.shape[1])
+        index_y = int(landmarks[8].y * frame.shape[0])
+
+        thumb_x = int(landmarks[4].x * frame.shape[1])
+        thumb_y = int(landmarks[4].y * frame.shape[0])
+
+        middle_x = int(landmarks[12].x * frame.shape[1])
+        middle_y = int(landmarks[12].y * frame.shape[0])
+
+        pyautogui.moveTo(
+            int(landmarks[8].x * screen_width),
+            int(landmarks[8].y * screen_height)
+        )
+
+        distance = math.sqrt(
+            (index_x - thumb_x) ** 2 +
+            (index_y - thumb_y) ** 2
+        )
+
+        if distance < 40:
+
+            if click_ready:
+                pyautogui.click()
+                click_ready = False
+
+            cv2.putText(
+                frame,
+                "CLICK",
+                (50, 80),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0, 255, 0),
+                2
+            )
+
+        else:
+            click_ready = True
+
+        mp_draw.draw_landmarks(
+            frame,
+            hand,
+            mp_hands.HAND_CONNECTIONS
+        )
+
+    cv2.putText(
+        frame,
+        "AI Hand Gesture Control",
+        (30, 40),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1,
+        (255, 255, 255),
+        2
+    )
+
+    cv2.imshow("AI Hand Gesture Computer Control", frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+
+This gives you a basic working prototype for webcam hand detection, cursor movement, and pinch-based clicking.
+
+14. Gesture Documentation
+
+Create a file called:
+
+gesture_mapping.md
+
+Content:
+
+# Gesture to Action Mapping
+
+| Gesture | Action |
+|---------|--------|
+| Index Finger | Move Cursor |
+| Thumb + Index Finger | Left Click |
+| Two Fingers | Scroll Up |
+| Fist | Scroll Down |
+| Thumbs Up | Increase Volume |
+| Thumbs Down | Decrease Volume |
+| Open Hand | Stop/Pause |
+15. Advantages
+Touch-free computer interaction.
+Easy to use.
+Uses commonly available hardware.
+No special wearable device is required.
+Real-time gesture recognition.
+Useful for accessibility applications.
+Demonstrates practical AI and computer-vision concepts.
+16. Limitations
+Requires a webcam.
+Performance depends on lighting conditions.
+Gestures may not be detected correctly when the hand is partially hidden.
+Fast movements can sometimes cause incorrect recognition.
+Background objects may affect detection.
+Continuous gesture detection requires sufficient processing power.
+17. Future Enhancements
+Add voice commands.
+Support both hands.
+Add more gestures.
+Control media playback.
+Control presentation slides.
+Open and close applications.
+Add gesture-based keyboard input.
+Improve recognition using a custom machine-learning model.
+Add a graphical user interface.
+Add user-specific gesture customization.
+18. Expected Output
+
+When the program is running:
+
+-----------------------------------------
+     AI HAND GESTURE COMPUTER CONTROL
+-----------------------------------------
+
+Webcam: Active
+Hand: Detected
+Gesture: Index Finger
+
+Action: Mouse Movement
+-----------------------------------------
+
+When the thumb and index finger touch:
+
+Gesture: Pinch
+Action: Left Click
+19. Screenshots to Take
+
+For your submission, take screenshots of:
+
+Screenshot 1
+
+Webcam + hand landmarks
+
+Show the 21 landmarks detected on your hand.
+
+Screenshot 2
+
+Cursor Movement
+
+Show your hand gesture while the cursor is being controlled.
+
+Screenshot 3
+
+Click Gesture
+
+Show thumb and index finger touching.
+
+Screenshot 4
+
+Scroll Gesture
+
+Show the two-finger gesture.
+
+Screenshot 5
+
+Project Running
+
+Show the complete application window with the detected gesture and action.
+
+20. Demo Video
+
+Your demo can be around 1–2 minutes.
+
+Demo sequence
+
+0–10 sec:
+Introduce the project.
+
+"This is our AI Hand Gesture Computer Control System. It uses a webcam and computer vision to control basic computer actions using hand gestures."
+
+10–30 sec:
+Show hand detection and cursor movement.
+
+30–45 sec:
+Show pinch gesture and clicking.
+
+45–60 sec:
+Show scrolling.
+
+60–75 sec:
+Show volume control.
+
+75–90 sec:
+Show different gestures and their corresponding actions.
+
+Ending
+
+"This project demonstrates how artificial intelligence and computer vision can be used to create a touch-free computer interaction system."
+
+21. GitHub Repository
+
+Repository name:
+
+AI-Hand-Gesture-Computer-Control
+
+Recommended files:
+
+AI-Hand-Gesture-Computer-Control
+│
+├── main.py
+├── requirements.txt
+├── README.md
+├── gesture_mapping.md
+├── screenshots
+│   ├── hand_detection.png
+│   ├── cursor_control.png
+│   ├── click.png
+│   └── scrolling.png
+│
+└── demo
+    └── demo_video.mp4
+requirements.txt
+opencv-python
+mediapipe
+pyautogui
+numpy
+22. Short Project Explanation
+
+AI Hand Gesture Computer Control System is a computer-vision application that uses a webcam to recognize hand gestures and convert them into computer actions. The system uses OpenCV for video capture, MediaPipe for hand landmark detection, and PyAutoGUI for controlling the mouse and keyboard. Different hand gestures are mapped to actions such as cursor movement, clicking, scrolling, and volume control. The project demonstrates a practical application of AI and computer vision for touch-free human-computer interaction.
+
+23. Conclusion
+
+The AI Hand Gesture Computer Control System demonstrates how computer vision and artificial intelligence can be used to create a natural and touch-free method of computer interaction. By detecting hand landmarks and recognizing predefined gestures, the system can perform various computer operations without requiring direct physical interaction with the mouse or keyboard.
+
+The project can be further enhanced by adding more gestures, voice commands, media controls, presentation controls, and personalized gesture recognition.
